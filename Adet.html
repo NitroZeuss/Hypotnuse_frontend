@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypotenuse - Article View</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+        }
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+        }
+        .navbar .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            color: #333;
+            font-family: 'Times New Roman', Times, serif;
+            transition: transform 0.3s;
+        }
+        .navbar .logo:hover {
+            transform: scale(1.05);
+        }
+        .navbar .nav-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s;
+        }
+        .navbar .nav-links a:hover {
+            transform: translateY(-2px);
+        }
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .navbar .user-info h4 {
+            margin: 0;
+        }
+        .navbar .user-info a {
+            background-color: #1f2937;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background-color 0.3s;
+        }
+        .navbar .user-info a:hover {
+            background-color: #374151;
+        }
+        .container {
+            max-width: 800px;
+            margin: 5rem auto 2rem;
+            padding: 0 1rem;
+        }
+        .article img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .article h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .article .meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+        .article .meta .author {
+            font-weight: 500;
+            color: #111;
+        }
+        .article .content {
+            font-size: 1.125rem;
+            line-height: 1.75;
+            margin-bottom: 2rem;
+        }
+        .article .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .article .tag {
+            background-color: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        .error {
+            color: #ef4444;
+            text-align: center;
+            padding: 2rem;
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+        @media (max-width: 640px) {
+            .navbar .nav-links {
+                display: none;
+            }
+        }
+
+        .Timage {
+            padding-top: 100px;
+            image-resolution: 500px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="logo">Hypotenuse</a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/about">About</a>
+                <a href="/articles">Articles</a>
+                <a href="/contact">Contact</a>
+                <a href="/write">Write</a>
+            </div>
+            <div class="user-info">
+                <h4 id="usernameDisplay">Username</h4>
+                <a id="userLink" href="/login">Get started</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div id="article-container">
+            <p class="loading">Loading article...</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const articleContainer = document.getElementById('article-container');
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id') || '1'; // Default to '1' if no ID is provided
+            const accessToken = localStorage.getItem('access_token'); // JWT from localStorage
+
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                if (isNaN(date)) {
+                    return 'Invalid date';
+                }
+                return date.toISOString().split('T')[0].replace(/-/g, '/');
+            }
+
+            function fetchArticle() {
+                fetch(`http://127.0.0.1:8000/def/article/${articleId}/`)
+                    .then(response => response.json())
+                    .then(article => {
+                        const authorName = article.author_name || 'Anonymous';
+                        const publishedDate = formatDate(article.published_date);
+                        const tagsHtml = article.tags?.map(tag => `<span class="tag">${tag}</span>`).join('') || '';
+                        const imageUrl = article.image ? `https://res.cloudinary.com/dxf2c3jnr/${article.image}` : 'https://via.placeholder.com/800x400';
+
+                        articleContainer.innerHTML = `
+                            <article class="article">
+                                <img class="Timage" src="${imageUrl}" alt="Article image">
+                                <h1>${article.title}</h1>
+                                <div class="meta">
+                                    <span class="author">By ${authorName}</span>
+                                    <span class="date">Published on ${publishedDate}</span>
+                                    <span id="likeCount" class="likes">Likes: ${article.like_count}</span>
+                                    <button id="likeButton">Like</button>
+                                </div>
+                                <div class="content">${article.content}</div>
+                                <div class="tags">${tagsHtml}</div>
+                            </article>
+                        `;
+                        setupLikeButton();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        articleContainer.innerHTML = `<p class="error">An error occurred while fetching the article: ${error.message}</p>`;
+                    });
+            }
+
+            function setupLikeButton() {
+                const likeButton = document.getElementById('likeButton');
+                const likeCount = document.getElementById('likeCount');
+
+                likeButton.addEventListener('click', () => {
+                    fetch(`http://127.0.0.1:8000/def/article/${articleId}/like/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`,
+                        },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            likeCount.textContent = `Likes: ${data.like_count}`;
+                            likeButton.textContent = data.message === "Article liked" ? "Unlike" : "Like";
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+            }
+
+            fetchArticle();
+        });
+    </script>
+</body>
+</html>

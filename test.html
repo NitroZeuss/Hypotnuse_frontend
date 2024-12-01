@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Info</title>
+</head>
+<body>
+    <h1>User Information</h1>
+    <p id="user-info">Loading user info...</p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Fetch the JWT token from localStorage
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                document.getElementById('user-info').innerText = 'No token found.';
+                return;
+            }
+
+            try {
+                // Send the POST request to the endpoint
+                const response = await fetch('http://127.0.0.1:8000/def/user-info/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        "access_token": token
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user info.');
+                }
+
+                // Parse the response
+                const data = await response.json();
+                
+                // Log the full response data to the console for debugging
+                console.log("Response data:", data);
+
+                // Access the nested user object and display only the username
+                const user = data.user;
+                if (user && user.username) {
+                    document.getElementById('user-info').innerText = `Username: ${user.username}`;
+                } else {
+                    document.getElementById('user-info').innerText = 'Username not found.';
+                }
+            } catch (error) {
+                document.getElementById('user-info').innerText = error.message;
+            }
+        });
+    </script>
+</body>
+</html>

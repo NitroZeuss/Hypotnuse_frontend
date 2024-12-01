@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=elevation" />
+    <title>Hypotenuse Dashboard - Featured Articles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar .logo {
+            font-size: 40px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #333;
+            font-family: 'Times New Roman', Times, serif;
+            transition: transform 0.3s;
+        }
+
+        .navbar .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-size: 1em;
+            transition: color 0.3s, transform 0.3s;
+            position: relative;
+        }
+
+        .navbar .nav-links a:hover {
+            color: #555;
+            transform: translateY(-2px);
+        }
+
+        .navbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: #333;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .navbar .nav-links a:hover::after {
+            transform: scaleX(1);
+        }
+
+        .navbar .user-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .navbar .user-info h4 {
+            font-size: 1em;
+            color: #333;
+            margin: 0;
+        }
+
+        .navbar .user-info a {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 15px;
+            color: #ffffff;
+            background-color: #262626;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .navbar .user-info a:hover {
+            background-color: #555;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .userd {
+            font-size: x-large;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .featured-section {
+            margin-top: 100px;
+            padding: 0 20px;
+        }
+
+        .featured-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            padding: 0 20px;
+        }
+
+        .featured-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .featured-title a {
+            color: #ff4081;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-button {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .nav-button:hover {
+            background-color: #f3f4f6;
+        }
+
+        .articles-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 20px;
+            margin: 0 -20px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .articles-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .articles-container {
+            display: inline-flex;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .article-card {
+            width: 400px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            white-space: normal;
+        }
+
+        .article-image-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .article-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .article-content {
+            padding: 20px;
+        }
+
+        .article-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #111;
+        }
+
+        .article-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .article-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #ffffff;
+        }
+
+        .article-link {
+            color: #111;
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .article-stats {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Color variations for cards */
+        .card-blue { background-color: #4338ca; }
+        .card-green { background-color: #84cc16; }
+        .card-yellow { background-color: #facc15; }
+        .card-purple { background-color: #8b5cf6; }
+
+        /* Updated styles for user avatar */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .logo {
+            padding: 15px;
+        }
+
+        /* New styles for welcome message */
+        .welcome-message {
+            background-color: #f0f0f0;
+            padding: 100px;
+            margin-top: 80px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="logo"> Hypotenuse</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/about.html">About</a>
+            <a href="/articles">Articles</a>
+            <a href="/contact">Contact</a>
+            <a href="/write.html">Write</a>
+        </div>
+        <div id="userInfoContainer" class="user-info">
+            <!-- User info will be dynamically inserted here -->
+        </div>
+    </nav>
+
+    <div id="welcome-container"></div>
+
+    <section class="featured-section">
+        <div class="featured-header">
+            <div class="featured-title">
+                FEATURED
+                <a href="/all">ALL →</a>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-button" id="prev-button">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="nav-button" id="next-button">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="articles-scroll" id="articles-scroll">
+            <div class="articles-container" id="articles"></div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoggedInUser();
+            fetchArticles();
+        });
+
+        async function checkLoggedInUser() {
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                displayGuest();
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/def/user-info/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: token }),
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    displayUserInfo(userData);
+                    displayWelcome(userData.username);
+                } else {
+                    console.error('Failed to fetch user data:', response.statusText);
+                    displayGuest();
+                }
+            } catch (error) {
+                console.error('Error fetching user information:', error);
+                displayGuest();
+            }
+        }
+
+        function displayUserInfo(userData) {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            const username = userData.username;
+            const profileImagePath = userData.profile_image;
+
+            userInfoContainer.innerHTML = `
+                <div class="user-avatar-container">
+                    <img src="${profileImagePath ? `https://res.cloudinary.com/dxf2c3jnr/${profileImagePath}` : '/path/to/default-avatar.png'}" 
+                         alt="${username}'s profile picture" 
+                         class="user-avatar">
+                </div>
+                <h4 class="userd">${username}</h4>
+                <a href="/profile">Profile</a>
+            `;
+        }
+
+        function displayGuest() {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            userInfoContainer.innerHTML = `
+                <div class="user-avatar-container">
+                    <img src="/path/to/default-avatar.png" alt="Guest Avatar" class="user-avatar">
+                </div>
+                <h4 class="userd">Guest</h4>
+                <a href="/get-started">Get Started</a>
+            `;
+            displayWelcome('Guest');
+        }
+
+        function displayWelcome(username) {
+            const welcomeContainer = document.getElementById('welcome-container');
+            welcomeContainer.innerHTML = `
+                <div class="welcome-message">
+                    <h2>Welcome, ${username}!</h2>
+                    <p>Explore our featured articles below.</p>
+                </div>
+            `;
+        }
+
+        const colors = ['card-blue', 'card-green', 'card-yellow', 'card-purple'];
+        let colorIndex = 0;
+
+        async function fetchArticles() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/def/article/');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch articles');
+                }
+                const articles = await response.json();
+                displayArticles(articles);
+            } catch (error) {
+                console.error('Error fetching articles:', error);
+                document.getElementById('articles').innerHTML = '<p>You havent logged in yet, Please do so to continue</p>';
+            }
+        }
+
+        function displayArticles(articles) {
+            const articlesContainer = document.getElementById('articles');
+            articlesContainer.innerHTML = '';
+
+            articles.forEach((article) => {
+                const articleCard = createArticleCard(article);
+                articlesContainer.appendChild(articleCard);
+            });
+        }
+
+        function createArticleCard(article) {
+            const color = colors[colorIndex];
+            colorIndex = (colorIndex + 1) % colors.length;
+
+            const articleCard = document.createElement('div');
+            articleCard.className = 'article-card';
+            articleCard.innerHTML = `
+                <div class="article-image-container ${color}">
+                    <img src="${article.image ? `https://res.cloudinary.com/dxf2c3jnr/${article.image}` : 'https://via.placeholder.com/400x200'}" 
+                         alt="${article.title}" 
+                         class="article-image">
+                </div>
+                <div class="article-content">
+                    <h2 class="article-title">${article.title}</h2>
+                    <p class="article-description">${article.content.substring(0, 150)}...</p>
+                    <div class="article-footer">
+                        <a href="/Adet.html?id=${article.id}" class="article-link">
+                            Read more
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                        <span class="article-stats">By ${article.author_name}</span>
+                    </div>
+                </div>
+            `;
+            return articleCard;
+        }
+
+        // Scroll navigation
+        document.getElementById('next-button').addEventListener('click', () => {
+            const container = document.getElementById('articles-scroll');
+            container.scrollBy({ left: 420, behavior: 'smooth' });
+        });
+
+        document.getElementById('prev-button').addEventListener('click', () => {
+            const container = document.getElementById('articles-scroll');
+            container.scrollBy({ left: -420, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>

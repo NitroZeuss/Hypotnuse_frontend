@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+        }
+        .login-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-form {
+            width: 300px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 16px;
+        }
+        input {
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 16px;
+            background-color: transparent;
+            outline: none;
+        }
+        input:focus {
+            border-bottom-color: #4CAF50;
+        }
+        button {
+            background-color: #414141;
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #272727;
+            border-radius: 15px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .success {
+            color: #4CAF50;
+        }
+        .error {
+            color: #f44336;
+        }
+        .logo {
+            font-family: 'Times New Roman', Times, serif;
+            position: absolute;
+            left: 43%;
+            font-size: xx-large;
+
+        }
+
+        .logo-con {
+            border-bottom: 1px solid gray;
+
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-con">
+    <h2 class="logo">Hypotenuse</h2>
+    </div>
+    <div class="container">
+        <div class="login-section">
+            <div class="login-form">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                    
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    
+                    <button type="submit">Login</button>
+                    <p>New to this site <a href="register.html">Sign up</a></p>
+                </form>
+                <p id="message"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const messageEl = document.getElementById("message");
+            const submitButton = document.querySelector('button[type="submit"]');
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Logging in...";
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/auth/jwt/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Login failed. Please check your credentials.");
+                }
+
+                const data = await response.json();
+                localStorage.setItem("access_token", data.access);
+
+                messageEl.textContent = "Login successful!";
+                window.location.href = "/dashboard.html";
+                messageEl.className = "success";
+            } catch (error) {
+                messageEl.textContent = error.message;
+                messageEl.className = "error";
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Login";
+            }
+        });
+    </script>
+</body>
+</html>

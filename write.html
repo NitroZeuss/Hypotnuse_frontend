@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypotenuse - Article Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #292929;
+            --placeholder-color: #6B6B6B;
+            --border-color: #E0E0E0;
+            --background-color: #FFFFFF;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            height: 100%;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .editor-header {
+            padding: 1rem 0;
+            margin-bottom: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .publish-button {
+            background-color: var(--text-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 99px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .publish-button:hover {
+            opacity: 0.8;
+        }
+
+        #title {
+            border: none;
+            outline: none;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            width: 100%;
+            color: var(--text-color);
+        }
+
+        #title::placeholder {
+            color: var(--placeholder-color);
+        }
+
+        #content {
+            border: none;
+            outline: none;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            min-height: 70vh;
+            width: 100%;
+            color: var(--text-color);
+        }
+
+        #content::placeholder {
+            color: var(--placeholder-color);
+        }
+
+        .image-upload {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 99px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #image-preview {
+            max-width: 100%;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .username {
+            font-weight: 600;
+        }
+
+        .formatting-options {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .formatting-options select {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        .tags-container {
+            margin-top: 1rem;
+        }
+
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .tag {
+            background-color: var(--border-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #tag-input {
+            border: none;
+            outline: none;
+            font-size: 0.875rem;
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="editor-header">
+            <div class="logo">Hypotenuse</div>
+            <div class="user-info" id="userInfoContainer"></div>
+            <button id="publish" class="publish-button">Publish</button>
+        </div>
+        <input type="text" id="title" placeholder="Title" autocomplete="off">
+        <div id="content" contenteditable="true" placeholder="Tell your story..."></div>
+        <div class="tags-container">
+            <div class="tags-input" id="tags-input">
+                <input type="text" id="tag-input" placeholder="Add a tag...">
+            </div>
+        </div>
+        <img id="image-preview" src="" alt="Image preview">
+        <label for="image" class="image-upload">
+            Add image
+            <input type="file" id="image" accept="image/*">
+        </label>
+    </div>
+
+    <div class="formatting-options">
+        <select id="formatting" onchange="applyFormatting(this.value)">
+            <option value="">Formatting</option>
+            <option value="h1">Heading 1</option>
+            <option value="h2">Heading 2</option>
+            <option value="h3">Heading 3</option>
+            <option value="bold">Bold</option>
+            <option value="italic">Italic</option>
+            <option value="underline">Underline</option>
+            <option value="strikethrough">Strikethrough</option>
+        </select>
+    </div>
+
+    <script>
+        let tags = [];
+
+        async function fetchUserInfo() {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                console.error('No access token found');
+                return null;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/def/user-info/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: token }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user info');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                return null;
+            }
+        }
+
+        function displayUserInfo(userData) {
+            const userInfoContainer = document.getElementById('userInfoContainer');
+            const username = userData.username;
+            const profileImagePath = userData.profile_image;
+
+            userInfoContainer.innerHTML = `
+                <div class="user-avatar-container">
+                    <img src="${profileImagePath ? `https://res.cloudinary.com/dxf2c3jnr/${profileImagePath}` : '/path/to/default-avatar.png'}" 
+                         alt="${username}'s profile picture" 
+                         class="user-avatar">
+                </div>
+                <span class="username">${username}</span>
+            `;
+        }
+
+        // Fetch and display user info
+        fetchUserInfo().then(userData => {
+            if (userData) {
+                displayUserInfo(userData);
+            }
+        });
+
+        function applyFormatting(style) {
+            if (style.startsWith('h')) {
+                document.execCommand('formatBlock', false, style);
+            } else {
+                document.execCommand(style, false, null);
+            }
+            document.getElementById('formatting').value = '';
+        }
+
+        // Image preview
+        document.getElementById('image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('image-preview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Tags functionality
+        const tagInput = document.getElementById('tag-input');
+        const tagsContainer = document.getElementById('tags-input');
+
+        tagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                const tagValue = this.value.trim();
+                if (tagValue && !tags.includes(tagValue)) {
+                    addTag(tagValue);
+                    this.value = '';
+                }
+            }
+        });
+
+        function addTag(tagValue) {
+            tags.push(tagValue);
+            const tagElement = document.createElement('div');
+            tagElement.classList.add('tag');
+            tagElement.innerHTML = `
+                ${tagValue}
+                <span class="tag-remove" onclick="removeTag('${tagValue}')">×</span>
+            `;
+            tagsContainer.insertBefore(tagElement, tagInput);
+        }
+
+        function removeTag(tagValue) {
+            tags = tags.filter(tag => tag !== tagValue);
+            renderTags();
+        }
+
+        function renderTags() {
+            tagsContainer.innerHTML = '';
+            tags.forEach(tag => {
+                const tagElement = document.createElement('div');
+                tagElement.classList.add('tag');
+                tagElement.innerHTML = `
+                    ${tag}
+                    <span class="tag-remove" onclick="removeTag('${tag}')">×</span>
+                `;
+                tagsContainer.appendChild(tagElement);
+            });
+            tagsContainer.appendChild(tagInput);
+        }
+
+        // Publish article
+        document.getElementById('publish').addEventListener('click', async () => {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').innerHTML;
+            const imageFile = document.getElementById('image').files[0];
+
+            const token = localStorage.getItem('access_token');
+
+            if (!token) {
+                alert('No JWT token found. Please authenticate first.');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('title', title);
+                formData.append('content', content);
+                tags.forEach(tag => formData.append('tags', tag));
+                if (imageFile) {
+                    formData.append('image', imageFile);
+                }
+
+                const response = await fetch('http://127.0.0.1:8000/def/article/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert('Article posted successfully!');
+                    // Clear form fields after successful submission
+                    document.getElementById('title').value = '';
+                    document.getElementById('content').innerHTML = '';
+                    document.getElementById('image').value = '';
+                    document.getElementById('image-preview').style.display = 'none';
+                    tags = [];
+                    renderTags();
+                } else {
+                    alert('Failed to post article. Error: ' + JSON.stringify(result));
+                }
+            } catch (error) {
+                console.error('Error posting article:', error);
+                alert('Error posting article. Please try again.');
+            }
+        });
+
+        // Add placeholder behavior for content div
+        const contentDiv = document.getElementById('content');
+        contentDiv.addEventListener('focus', function() {
+            if (this.innerHTML === this.getAttribute('placeholder')) {
+                this.innerHTML = '';
+            }
+        });
+        contentDiv.addEventListener('blur', function() {
+            if (this.innerHTML === '') {
+                this.innerHTML = this.getAttribute('placeholder');
+            }
+        });
+        // Set initial placeholder
+        contentDiv.innerHTML = contentDiv.getAttribute('placeholder');
+    </script>
+</body>
+</html>
+

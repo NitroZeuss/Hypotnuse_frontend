@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Auth Test</title>
+</head>
+<body>
+  <script>
+    // Insert the JavaScript code here
+    const access_token = localStorage.getItem('access_token'); 
+    console.log(access_token)
+    function checkConnection() {
+      if (!access_token) {
+        console.log('No access token found in local storage');
+        return;
+      }
+      fetch('http://127.0.0.1:8000/def/article/', {  
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${access_token}`, 
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Connected');  
+        } else if (response.status === 401) {
+          console.log('Unauthorized: Invalid or expired token');
+        } else {
+          console.log('Connection failed with status:', response.status);
+        }
+      })
+      .catch(error => {
+        console.error('Error connecting to server:', error);
+      });
+    }
+    checkConnection();
+  </script>
+</body>
+</html>

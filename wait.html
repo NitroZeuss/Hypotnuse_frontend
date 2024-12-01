@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activation Status</title>
+    <style>
+        /* Basic styling for the page and animation */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        #statusMessage {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        #loadingAnimation {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #ccc;
+            border-top-color: #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const uid = params.get('uid');
+            const token = params.get('token');
+
+            if (uid && token) {
+                checkVerificationStatus(uid, token);
+            }
+
+            function checkVerificationStatus(uid, token) {
+                fetch(`http://127.0.0.1:8000/api/games/activate/${uid}/${token}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message === 'Email verified successfully') {
+                            document.getElementById('statusMessage').textContent = 'Link Verified! Redirecting...';
+                            document.getElementById('loadingAnimation').style.display = 'none'; // Hide the animation
+                            // Redirect to home page after a delay
+                            setTimeout(() => {
+                                window.location.href = '/home.html'; // Update this URL to your home page
+                            }, 2000);
+                        } else {
+                            document.getElementById('statusMessage').textContent = 'Invalid or expired activation link.';
+                            document.getElementById('loadingAnimation').style.display = 'none'; // Hide the animation
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking verification status:', error);
+                        document.getElementById('statusMessage').textContent = 'An error occurred. Please try again later.';
+                        document.getElementById('loadingAnimation').style.display = 'none'; // Hide the animation
+                    });
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1 id="statusMessage">Verifying your account...</h1>
+    <!-- Loading animation -->
+    <div id="loadingAnimation"></div>
+</body>
+</html>
